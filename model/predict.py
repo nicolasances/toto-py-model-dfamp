@@ -27,6 +27,9 @@ class Predictor:
         # 1. Feature engineering
         features_df = FeatureEngineering().do_for_predict(data, id_encoder, context)
 
+        if len(features_df) == 0: 
+            return ModelPrediction(prediction={})
+
         # 2. Load model & other required files
         trained_model = joblib.load(model.files['model'])
 
@@ -46,4 +49,4 @@ class Predictor:
 
         except ValueError:
             
-            return ModelPrediction(prediction={predicted_type: None})
+            return ModelPrediction(prediction={})

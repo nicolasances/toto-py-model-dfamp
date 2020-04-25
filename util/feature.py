@@ -26,7 +26,12 @@ class FeatureEngineering:
             Requires the following keys to be present: 
             - alimentId (str)
         """
-        aliment_encoded_id = id_encoder.transform([data['alimentId']])[0]
+        aliment_id = data['alimentId']
+
+        if aliment_id not in id_encoder.classes_: 
+            return pd.DataFrame()
+
+        aliment_encoded_id = id_encoder.transform([aliment_id])[0]
 
         id_cols = list(map(lambda x : 'id_' + str(x), id_encoder.transform(id_encoder.classes_)))
 
