@@ -15,6 +15,25 @@ class FeatureEngineering:
 
     def __init__(self): 
         pass
+    
+    def __dummizer(self, encoded_id, id_encoder):
+        """
+        This method creates the dummies when an encoder has already been defined
+        This is usefull to maintain the same dummy features after the training
+        Using a pd.get_dummies() wouldn't work after training (e.g. in the scoring process), because
+        the available data differs from the training data, so the aliments can be different and using the pd.get_dummies()
+        would end up having different features during scoring.
+
+        This method takes the original aliments and creates the dummy columns
+        """
+        id_cols = list(map(lambda x : 'id_' + str(x), id_encoder.transform(id_encoder.classes_)))
+
+        vals = [0 for x in range(len(id_cols))]
+
+        vals[encoded_id] = 1
+
+        return pd.Series(vals, index=id_cols)
+
 
     def do_for_predict(self, data, id_encoder, context): 
         """
@@ -65,7 +84,9 @@ class FeatureEngineering:
         raw_data_df['encoded_id'] = id_encoder.transform(raw_data_df['id'])
 
         # 3. Convert the encoded_id into dummies
-        raw_data_df = pd.concat([raw_data_df, pd.get_dummies(raw_data_df['encoded_id'], prefix='id')], axis=1)
+        id_dummies = raw_data_df['encoded_id'].apply(self.__dummizer, args=[id_encoder])
+
+        raw_data_df = pd.concat([raw_data_df, id_dummies], axis=1)
         
         # 4. Make amounts categorical!!
         raw_data_df = pd.concat([raw_data_df, pd.get_dummies(raw_data_df['amountGr'], prefix='amountGr')], axis=1)
